@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temperature and Humidity Plot</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.18.1.min.js"></script>
+    <style>
+        body {
+            background-color: #1a1a1a; /* Darker background, but not black */
+            color: #f0f0f0; /* Light text color */
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            color: #f0f0f0;
+            margin-top: 20px;
+        }
+
+        /* Container for the plots */
+        .plot-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            padding: 20px;
+        }
+
+        /* Individual plot styling */
+        .plot {
+            flex: 1 1 45%; /* Take 45% of the space on larger screens */
+            min-width: 300px; /* Ensure the plot doesn't get too small */
+            margin: 10px;
+            padding: 0; /* Remove padding */
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .plot {
+                flex: 1 1 100%; /* Stack plots vertically on small screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Temperature and Humidity Plots</h1>
+    
+    <!-- Container for the temperature plots -->
+    <div class="plot-container">
+        <div id="bedroomTempPlot" class="plot"></div>
+        <div id="officeTempPlot" class="plot"></div>
+    </div>
+    
+    <!-- Container for the humidity plots -->
+    <div class="plot-container">
+        <div id="bedroomHumidPlot" class="plot"></div>
+        <div id="officeHumidPlot" class="plot"></div>
+    </div>
+    
+    <script>
+        // Function to fetch and load the CSV file
+        function loadCSV() {
+            const filePath = 'data.csv'; // Path to CSV file from HTML file
+            
+            fetch(filePath)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(csvText => {
+                    Papa.parse(csvText, {
+                        header: false,
+                        dynamicTyping: true,
+                        complete: function(results) {
+                            processAndPlotData(results.data);
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching the CSV file:', error);
+                });
+        }
+
+        // Function to filter data for the last 12 hours
+        function filterData(data) {
+            const now = new Date();
+            const twelveHoursAgo = new Date(now.getTime() - (12 * 60 * 60 * 1000)); // 12 hours ago
+
+            return data.filter(row => {
+                const rowDate = new Date(row[0]); // Assuming first column is datetime
+                return rowDate >= twelveHoursAgo;
+            });
+        }
+
+        // Function to process CSV data and plot it
+        function processAndPlotData(data) {
+            // Define the column headers
+            const headers = ['datetime', 'room', 'temperature', 'humidity', 'pressure'];
+
+            // Filter data to include only the last 12 hours
+            const filteredData = filterData(data);
+
+            // Separate data by room
+            const bedroomData = {
+                datetime: [],
+                temperature: [],
+                humidity: []
+            };
+            const officeData = {
+                datetime: [],
+                temperature: [],
+                humidity: []
+            };
+
+            filteredData.forEach(row => {
+                const rowData = {};
+                headers.forEach((header, index) => {
+                    rowData[header] = row[index];
+                });
+
+                if (rowData.room === 'Bedroom') {
+                    bedroomData.datetime.push(rowData.datetime);
+                    bedroomData.temperature.push(rowData.temperature);
+                    bedroomData.humidity.push(rowData.humidity);
+                } else if (rowData.room === 'Office') {
+                    officeData.datetime.push(rowData.datetime);
+                    officeData.temperature.push(rowData.temperature);
+                    officeData.humidity.push(rowData.humidity);
+                }
+            });
+
+            // Define pastel colors
+            const pastelRed = '#ff6f61';
+            const pastelBlue = '#779ECB';
+
+            // Plot data for Bedroom Temperature
+            Plotly.newPlot('bedroomTempPlot', [{
+                x: bedroomData.datetime,
+                y: bedroomData.temperature,
+                type: 'scatter',
+                mode: 'lines+markers',
+                marker: { color: pastelRed },
+                line: { color: pastelRed },
+                name: 'Bedroom Temperature'
+            }], {
+                title: 'Bedroom Temperature',
+                yaxis: { title: 'Temperature (°C)', color: '#f0f0f0' },
+                plot_bgcolor: '#1a1a1a',  // Match background color
+                paper_bgcolor: '#1a1a1a', // Match body background color
+                font: { color: '#f0f0f0' }, // Light text color
+                margin: { t: 40, b: 40, l: 40, r: 40 },
+                responsive: true
+            });
+
+            // Plot data for Office Temperature
+            Plotly.newPlot('officeTempPlot', [{
+                x: officeData.datetime,
+                y: officeData.temperature,
+                type: 'scatter',
+                mode: 'lines+markers',
+                marker: { color: pastelRed },
+                line: { color: pastelRed },
+                name: 'Office Temperature'
+            }], {
+                title: 'Office Temperature',
+                yaxis: { title: 'Temperature (°C)', color: '#f0f0f0' },
+                plot_bgcolor: '#1a1a1a',  // Match background color
+                paper_bgcolor: '#1a1a1a', // Match body background color
+                font: { color: '#f0f0f0' }, // Light text color
+                margin: { t: 40, b: 40, l: 40, r: 40 },
+                responsive: true
+            });
+
+            // Plot data for Bedroom Humidity
+            Plotly.newPlot('bedroomHumidPlot', [{
+                x: bedroomData.datetime,
+                y: bedroomData.humidity,
+                type: 'scatter',
+                mode: 'lines+markers',
+                marker: { color: pastelBlue },
+                line: { color: pastelBlue },
+                name: 'Bedroom Humidity'
+            }], {
+                title: 'Bedroom Humidity',
+                yaxis: { title: 'Humidity (%)', color: '#f0f0f0' },
+                plot_bgcolor: '#1a1a1a',  // Match background color
+                paper_bgcolor: '#1a1a1a', // Match body background color
+                font: { color: '#f0f0f0' }, // Light text color
+                margin: { t: 40, b: 40, l: 40, r: 40 },
+                responsive: true
+            });
+
+            // Plot data for Office Humidity
+            Plotly.newPlot('officeHumidPlot', [{
+                x: officeData.datetime,
+                y: officeData.humidity,
+                type: 'scatter',
+                mode: 'lines+markers',
+                marker: { color: pastelBlue },
+                line: { color: pastelBlue },
+                name: 'Office Humidity'
+            }], {
+                title: 'Office Humidity',
+                yaxis: { title: 'Humidity (%)', color: '#f0f0f0' },
+                plot_bgcolor: '#1a1a1a',  // Match background color
+                paper_bgcolor: '#1a1a1a', // Match body background color
+                font: { color: '#f0f0f0' }, // Light text color
+                margin: { t: 40, b: 40, l: 40, r: 40 },
+                responsive: true
+            });
+        }
+
+        // Load the CSV file when the page loads
+        window.onload = function() {
+            loadCSV(); // Initial load
+            setInterval(loadCSV, 60000); // Refresh every 60,000 milliseconds (1 minute)
+        };
+    </script>
+</body>
+</html>

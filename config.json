@@ -1,0 +1,21 @@
+{
+  "metadata": {
+    "full_database_path": "db",
+    "full_database_name": "sensor_data.csv",
+    "small_database_path": "server",
+    "small_database_name": "data.csv",
+    "num_rows_to_copy": 1440
+  },
+  "servers": [
+    {
+      "name": "Bedroom",
+      "address": "192.168.xxx.xx",
+      "signals": ["temperature", "humidity", "pressure"]
+    },
+    {
+      "name": "Office",
+      "address": "192.168.xxx.xx",
+      "signals": ["temperature", "humidity", "pressure"]
+    }
+  ]
+}
