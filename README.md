@@ -71,11 +71,12 @@ sensor-data/
      cd  /path/to/your/project/sensor-data/server
      python -m http.server 8888
      ```
-   - Access the web interface by navigating to `http://<your-computer-ip>:8888` in a browser.
-
+   - Access the web interface by navigating to `http://<your-computer-ip>:8888` in a browser. 
+     
 ### Accessing the Web Interface
 
 Visit `http://<your-computer-ip>:8888/index.html` for temperature and humidity plots.
+![View of the webpage](img/final.png)
 
 ### Disclaimer
 
