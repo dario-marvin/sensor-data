@@ -46,7 +46,7 @@ sensor-data/
 ### Hardware Setup
 
 1. **General instructions** 
-   - Connect the BME280 sensors to the ESP8266 boards according to the followin image 
+   - Connect the BME280 sensors to the ESP8266 boards according to the following image 
    ![Wiring betwen ESP8266 board and BME280 sensor](img/wiring.png)
    - Flash the ESP8266 boards with the Arduino code to start the web server and write down each board IP address.
    - Ensure the ESP8266 boards are connected to the same Wi-Fi network as the computer running the Python scripts.
